@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucky Lincoln Gaming | Contact Center Analytics</title>
+  <style>
+    :root{
+      --black:#050505;
+      --black-2:#0d0d0d;
+      --black-3:#171717;
+      --red:#e53924;
+      --red-dark:#b72419;
+      --yellow:#ffd21a;
+      --yellow-deep:#f4bf00;
+      --white:#ffffff;
+      --offwhite:#f8f6f0;
+      --muted:#b7b7b7;
+      --line:#303030;
+      --green:#38b878;
+      --shadow:0 18px 46px rgba(0,0,0,.42);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--white);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(229,57,36,.20), transparent 30%),
+        radial-gradient(circle at 90% 7%, rgba(255,210,26,.10), transparent 24%),
+        var(--black);
+      min-height:100vh;
+    }
+    .shell{max-width:1460px;margin:0 auto;padding:18px 24px 42px}
+
+    .brandbar{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:14px 20px;margin-bottom:16px;border-radius:20px;
+      background:linear-gradient(180deg,#111,#080808);border:2px solid var(--yellow);
+      box-shadow:0 10px 30px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.04)
+    }
+    .brandbar img{width:216px;max-width:42vw;height:auto;display:block}
+    .brand-title{text-align:right}
+    .brand-title strong{display:block;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
+    .brand-title span{display:block;color:#e6e6e6;font-size:13px;margin-top:5px}
+
+    .toolbar{display:flex;gap:12px;justify-content:space-between;align-items:center;margin:16px 0;flex-wrap:wrap}
+    .toolbar .left{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .toolbar .right{display:flex;gap:10px;flex-wrap:wrap}
+    .status{font-size:12px;padding:8px 11px;border-radius:999px;background:#111;border:1px solid #383838;color:#ddd}
+    .subtle{font-size:13px;color:var(--muted)}
+    button{border:none;border-radius:12px;padding:11px 15px;font-weight:900;cursor:pointer;background:#1c1c1c;color:#fff;border:1px solid #383838;transition:.16s transform,.16s background,.16s border-color}
+    button:hover{transform:translateY(-1px);border-color:var(--yellow)}
+    button.primary{background:var(--yellow);color:#090909;border-color:var(--yellow);box-shadow:inset 0 -2px 0 rgba(0,0,0,.16)}
+    button.primary:hover{background:#ffe04e}
+    button.ghost{background:#151515;color:#fff}
+    button.danger{background:var(--red);border-color:#ff6c5d}
+
+    .backfill,.panel,.filters-wrap{background:linear-gradient(180deg,#151515,#0d0d0d);border:1px solid #333;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .filters-wrap{padding:18px;margin-bottom:18px;border-top:4px solid var(--yellow)}
+    .filters-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+    .filters-head h2,.panel-head h2,.backfill-head h2{margin:0;font-size:20px;letter-spacing:-.02em}
+    .filters-head h2:after,.panel-head h2:after,.backfill-head h2:after{content:"";display:block;width:42px;height:4px;background:var(--red);margin-top:8px;border-radius:99px}
+    .filters{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;align-items:end}
+    .filters .wide{grid-column:span 2}
+    label{display:block;font-size:11px;color:var(--yellow);text-transform:uppercase;letter-spacing:.12em;font-weight:900;margin:0 0 7px}
+    input,select{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #3a3a3a;background:#070707;color:#fff;outline:none}
+    input:focus,select:focus{border-color:var(--yellow);box-shadow:0 0 0 2px rgba(255,210,26,.12)}
+    input::placeholder{color:#777}
+    .date-field input[type="date"]{
+      cursor:pointer;
+      padding-right:46px;
+      color-scheme:dark;
+      background-color:#070707;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Crect x='3' y='5' width='14' height='14' rx='2' stroke='%23FFD21A' stroke-width='2'/%3E%3Cpath d='M3 9H17' stroke='%23FFD21A' stroke-width='2'/%3E%3Cpath d='M7 3V7' stroke='%23FFD21A' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M13 3V7' stroke='%23FFD21A' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='18' cy='18' r='3' stroke='%23E53924' stroke-width='2'/%3E%3Cpath d='M20.5 20.5L22 22' stroke='%23E53924' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 13px center;
+      background-size:20px 20px;
+    }
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator{
+      opacity:0;
+      cursor:pointer;
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+    }
+    .filter-actions{display:flex;gap:10px;justify-content:flex-end;align-items:end}
+
+    .cards{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px;margin:0 0 18px}
+    .card{position:relative;overflow:hidden;padding:17px;border-radius:18px;background:#111;border:1px solid #303030;min-height:122px;box-shadow:0 10px 22px rgba(0,0,0,.22)}
+    .card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--yellow)}
+    .card.red:before{background:var(--red)}
+    .card.green:before{background:var(--green)}
+    .card.gold:before{background:var(--yellow)}
+    .card .label{font-size:11px;color:#d8d8d8;font-weight:900;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+    .card .value{font-size:30px;font-weight:950;letter-spacing:-.03em;line-height:1;color:#fff}
+    .card .note{font-size:12px;color:#949494;margin-top:8px;line-height:1.4}
+    .cards .span2{grid-column:span 2}
+
+    .backfill{display:none;padding:18px;margin-bottom:18px;border-top:4px solid var(--red)}
+    .backfill.show{display:block}
+    .backfill-head{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:16px}
+    .backfill-head p{margin:7px 0 0;color:var(--muted);max-width:720px;line-height:1.5}
+    .backfill-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+    .progress-track{height:12px;background:#050505;border-radius:999px;margin-top:18px;overflow:hidden;border:1px solid #333}
+    .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--yellow))}
+    .progress-text{margin-top:10px;font-size:13px;color:var(--muted)}
+
+    .panel{padding:18px;border-top:4px solid var(--red)}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+    .panel-sub{font-size:13px;color:var(--muted);margin-top:6px}
+    .table-wrap{overflow:auto;border-radius:14px;border:1px solid #303030;background:#080808}
+    table{width:100%;border-collapse:collapse;min-width:1060px}
+    thead th{position:sticky;top:0;z-index:1;background:var(--red);color:#fff;font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-align:left;padding:13px;border-bottom:3px solid var(--yellow)}
+    tbody td{padding:13px;border-bottom:1px solid #262626;vertical-align:top;color:#f6f6f6;font-size:14px}
+    tbody tr:nth-child(even){background:#0d0d0d}
+    tbody tr:hover{background:#181818}
+    .muted{display:block;color:#8e8e8e;font-size:12px;margin-top:4px}
+    .badge{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;border:1px solid transparent}
+    .badge.ANSWERED{background:rgba(56,184,120,.14);color:#8cf0b9;border-color:rgba(56,184,120,.4)}
+    .badge.UNSERVED_NO_AGENTS_AVAILABLE{background:rgba(229,57,36,.18);color:#ffb6aa;border-color:rgba(229,57,36,.55)}
+    .badge.UNSERVED_AGENTS_AVAILABLE{background:rgba(255,210,26,.12);color:#ffe466;border-color:rgba(255,210,26,.45)}
+    .badge.UNSERVED_AVAILABILITY_UNKNOWN{background:#222;color:#ddd;border-color:#444}
+    .badge.IN_PROGRESS{background:rgba(255,210,26,.13);color:#ffe568;border-color:rgba(255,210,26,.4)}
+    .sms-yes,.sms-no{font-weight:900}
+    .sms-yes{color:#76e6a6}.sms-no{color:#ff8c7e}
+    .empty,.error{padding:16px;border-radius:14px}
+    .empty{color:var(--muted)}
+    .error{display:none;margin:0 0 18px;background:rgba(229,57,36,.13);border:1px solid rgba(229,57,36,.5);color:#ffd0ca}
+
+    @media(max-width:1180px){.hero-grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.filters{grid-template-columns:repeat(3,minmax(0,1fr))}.filters .wide{grid-column:span 1}}
+    @media(max-width:720px){.shell{padding:14px}.brandbar{align-items:flex-start}.brand-title{display:none}.brandbar img{max-width:70vw}.hero{padding:22px 18px}.hero h1{font-size:30px}.hero-stats{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.cards .span2{grid-column:span 2}.filters{grid-template-columns:1fr 1fr}.backfill-grid{grid-template-columns:1fr}.toolbar{align-items:stretch}.toolbar .left,.toolbar .right{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="brandbar">
+      <img src="/logo.svg" alt="Lucky Lincoln Gaming" />
+      <div class="brand-title">
+        <strong>Contact Center Analytics</strong>
+        <span>Webex operations, agent availability, and SMS follow-up</span>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="left">
+        <span id="status" class="status">Loading…</span>
+        <span class="subtle">Dashboard refreshes automatically. Webex can still be synced manually at any time.</span>
+      </div>
+      <div class="right" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="backfillBtn" class="ghost">Historical Import</button>
+        <button id="refreshBtn" class="ghost">Refresh Data</button>
+        <button id="syncBtn" class="primary">Sync Webex</button>
+      </div>
+    </div>
+
+    <div id="error" class="error"></div>
+
+    <section id="backfillPanel" class="backfill">
+      <div class="backfill-head">
+        <div>
+          <h2>Historical Webex Import</h2>
+          <p>Import older call and agent-state history into PostgreSQL. Large ranges are automatically split into safe Webex windows so the import stays within Webex Search API limits.</p>
+        </div>
+        <button id="closeBackfillBtn" class="ghost">Close</button>
+      </div>
+      <div class="backfill-grid">
+        <div><label>Start Date</label><input id="backfillStart" type="date" value="2024-01-01" /></div>
+        <div><label>End Date</label><input id="backfillEnd" type="date" /></div>
+        <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button id="startBackfillBtn" class="primary">Import History</button>
+          <button id="cancelBackfillBtn" class="danger" style="display:none">Stop</button>
+        </div>
+      </div>
+      <div class="progress-track"><div id="backfillProgress" class="progress-bar"></div></div>
+      <div id="backfillStatus" class="progress-text">Choose a range, then start the import. Keep this page open while it runs.</div>
+    </section>
+
+    <section class="filters-wrap">
+      <div class="filters-head">
+        <div>
+          <h2>Filters</h2>
+          <div class="subtle">Narrow the dashboard by date, queue, agent, outcome, caller number, and SMS status.</div>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="date-field"><label for="fromDate">From</label><input id="fromDate" type="date" /></div>
+        <div class="date-field"><label for="toDate">To</label><input id="toDate" type="date" /></div>
+        <div><label>Queue</label><select id="queue"><option value="">All queues</option></select></div>
+        <div><label>Agent</label><select id="agent"><option value="">All agents</option></select></div>
+        <div><label>Outcome</label><select id="outcome"><option value="">All outcomes</option></select></div>
+        <div><label>SMS</label><select id="sms"><option value="">All</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div class="wide"><label>Caller Search</label><input id="callerQuery" type="text" placeholder="Search by caller number" /></div>
+      </div>
+      <div class="filter-actions" style="margin-top:14px">
+        <button id="clearBtn" class="ghost">Clear</button>
+        <button id="applyBtn" class="primary">Apply Filters</button>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card gold"><div class="label">Total Calls</div><div class="value" id="totalCalls">—</div><div class="note">All calls matching the current filters</div></div>
+      <div class="card green"><div class="label">Answered</div><div class="value" id="answered">—</div><div class="note">Connected to an agent</div></div>
+      <div class="card red"><div class="label">Unserved</div><div class="value" id="unserved">—</div><div class="note">Did not reach an agent</div></div>
+      <div class="card red"><div class="label">No Agents Available</div><div class="value" id="noAgents">—</div><div class="note">Unserved due to no available agents</div></div>
+      <div class="card gold"><div class="label">Agents Available</div><div class="value" id="agentsAvailable">—</div><div class="note">Unserved while agents were available</div></div>
+      <div class="card gold"><div class="label">SMS Sent</div><div class="value" id="smsSent">—</div><div class="note">Calls with outbound SMS follow-up</div></div>
+      <div class="card span2"><div class="label">Avg Wait / Longest Wait</div><div class="value" id="waits">—</div><div class="note">Queue wait among matching calls</div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Call History</h2>
+          <div class="panel-sub">Review each call, who answered it, whether any agents were available, and whether an SMS was sent.</div>
+        </div>
+        <span id="rowCount" class="status">0 calls</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Caller</th>
+              <th>Queue</th>
+              <th>Wait</th>
+              <th>Result</th>
+              <th>Answered By</th>
+              <th>Available Agents</th>
+              <th>SMS</th>
+            </tr>
+          </thead>
+          <tbody id="callsBody"></tbody>
+        </table>
+        <div id="empty" class="empty" style="display:none">No calls match these filters.</div>
+      </div>
+    </section>
+  </main>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { filtersLoaded:false, backfillRunning:false, backfillStop:false, dashboardLoading:false, autoRefreshMs:30000 };
+
+function enableDatePicker(id){
+  const input = $(id);
+  if(!input) return;
+  input.addEventListener('click', () => {
+    if(typeof input.showPicker === 'function'){
+      try { input.showPicker(); } catch(e) {}
+    }
+  });
+}
+
+function secondsLabel(v){
+  const n = Number(v || 0); const m = Math.floor(n/60); const s = Math.round(n%60);
+  return m ? `${m}m ${String(s).padStart(2,'0')}s` : `${s}s`;
+}
+function fmtTime(iso){
+  if(!iso) return '—';
+  return new Intl.DateTimeFormat([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date(iso));
+}
+function esc(v){ return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function outcomeLabel(v){ return ({ANSWERED:'Answered',UNSERVED_AGENTS_AVAILABLE:'Unserved — Agents Available',UNSERVED_NO_AGENTS_AVAILABLE:'Unserved — No Agents Available',UNSERVED_AVAILABILITY_UNKNOWN:'Unserved — Availability Unknown',IN_PROGRESS:'In Progress',REVIEW:'Review'})[v] || v || 'Unknown'; }
+function queryString(includeOutcome=true){
+  const p = new URLSearchParams();
+  if($('fromDate').value) p.set('from_date',$('fromDate').value);
+  if($('toDate').value) p.set('to_date',$('toDate').value);
+  if($('queue').value) p.set('queue',$('queue').value);
+  if($('agent').value) p.set('agent',$('agent').value);
+  if(includeOutcome && $('outcome').value) p.set('outcome',$('outcome').value);
+  if($('sms').value) p.set('sms',$('sms').value);
+  if($('callerQuery').value.trim()) p.set('caller_query',$('callerQuery').value.trim());
+  return p.toString();
+}
+async function api(url, options){
+  const res = await fetch(url, options); if(!res.ok){ throw new Error(`${res.status}: ${await res.text()}`); } return res.json();
+}
+function showError(err){ $('error').textContent = err.message || String(err); $('error').style.display='block'; }
+function clearError(){ $('error').style.display='none'; }
+
+async function loadFilters(){
+  const data = await api('/api/dashboard/filters');
+  const fill = (id, values, placeholder) => { const sel=$(id); const current=sel.value; sel.innerHTML=`<option value="">${placeholder}</option>` + values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''); sel.value=current; };
+  fill('queue', data.queues || [], 'All queues');
+  fill('agent', data.agents || [], 'All agents');
+  fill('outcome', data.outcomes || [], 'All outcomes');
+  state.filtersLoaded=true;
+}
+
+async function loadDashboard(){
+  if(state.dashboardLoading) return;
+  state.dashboardLoading=true;
+  clearError(); $('status').textContent='Loading…';
+  try{
+    if(!state.filtersLoaded) await loadFilters();
+    const [summary,calls] = await Promise.all([
+      api('/api/dashboard/summary?' + queryString(false)),
+      api('/api/dashboard/calls?limit=500&' + queryString(true))
+    ]);
+    $('totalCalls').textContent=summary.total_calls;
+    $('answered').textContent=summary.answered;
+    $('unserved').textContent=summary.unserved;
+    $('noAgents').textContent=summary.unserved_no_agents_available;
+    $('agentsAvailable').textContent=summary.unserved_agents_available;
+    $('smsSent').textContent=summary.sms_sent ?? 0;
+    $('waits').textContent=`${secondsLabel(summary.avg_wait_seconds)} / ${secondsLabel(summary.longest_wait_seconds)}`;
+    $('rowCount').textContent=`${calls.length} call${calls.length===1?'':'s'}`;
+    $('empty').style.display=calls.length?'none':'block';
+    $('callsBody').innerHTML=calls.map(c=>{
+      let names='—'; try { const parsed=JSON.parse(c.available_agent_names || '[]'); if(parsed.length) names=parsed.join(', '); } catch(e) { if(c.available_agent_names) names=c.available_agent_names; }
+      const available = c.available_agent_count ? `${c.available_agent_count}${names!=='—'?` — ${esc(names)}`:''}` : '0';
+      const sms = c.sms_sent === true ? '<span class="sms-yes">Yes</span>' : '<span class="sms-no">No</span>';
+      return `<tr>
+        <td>${fmtTime(c.created_at)}<span class="muted">Ended ${fmtTime(c.ended_at)}</span></td>
+        <td>${esc(c.caller_number || 'Unknown')}<span class="muted">Dialed ${esc(c.destination || '—')}</span></td>
+        <td>${esc(c.queue || '—')}</td>
+        <td>${secondsLabel(c.wait_seconds)}</td>
+        <td><span class="badge ${esc(c.outcome)}">${esc(outcomeLabel(c.outcome))}</span></td>
+        <td>${esc(c.answered_by || '—')}</td>
+        <td>${available}</td>
+        <td>${sms}</td>
+      </tr>`;
+    }).join('');
+    $('status').textContent=`Updated ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+  }catch(err){ showError(err); $('status').textContent='Load failed'; }
+  finally { state.dashboardLoading=false; }
+}
+
+async function loadSyncStatus(){
+  try {
+    const s = await api('/api/sync/status');
+    const latest = s.latest_call_at ? new Date(s.latest_call_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : 'none yet';
+    const auto = s.auto_sync_enabled ? `Auto-sync ${Math.round(s.auto_sync_seconds/60)}m` : 'Auto-sync off';
+    $('status').title = `${auto} · latest call ${latest} · unmatched SMS ${s.unmatched_sms_events}`;
+  } catch(e) {}
+}
+
+function dateStartUtcMs(value){ return Date.parse(value + 'T00:00:00.000Z'); }
+function dateEndUtcMs(value){ return Date.parse(value + 'T23:59:59.999Z'); }
+function makeBackfillWindows(startMs, endMs){
+  const maxSpan = 30 * 24 * 60 * 60 * 1000;
+  const out=[]; let cursor=startMs;
+  while(cursor <= endMs){
+    const to=Math.min(cursor + maxSpan - 1, endMs);
+    out.push({from:cursor,to}); cursor=to+1;
+  }
+  return out;
+}
+function rangeLabel(w){
+  const fmt = ms => new Date(ms).toISOString().slice(0,10);
+  return `${fmt(w.from)} → ${fmt(w.to)}`;
+}
+async function runBackfill(){
+  const start=$('backfillStart').value, end=$('backfillEnd').value;
+  if(!start || !end){ showError(new Error('Choose both a historical start and end date.')); return; }
+  const startMs=dateStartUtcMs(start), endMs=dateEndUtcMs(end);
+  if(startMs > endMs){ showError(new Error('Historical start date must be before the end date.')); return; }
+
+  clearError(); state.backfillRunning=true; state.backfillStop=false;
+  $('startBackfillBtn').disabled=true; $('cancelBackfillBtn').style.display='inline-block';
+  let queue=makeBackfillWindows(startMs,endMs);
+  let completed=0, processedCalls=0, activityRows=0, splitCount=0, warnings=0;
+  let estimatedTotal=queue.length;
+
+  try{
+    while(queue.length && !state.backfillStop){
+      const w=queue.shift();
+      $('backfillStatus').textContent=`Importing ${rangeLabel(w)} · ${completed} completed window${completed===1?'':'s'} · ${queue.length+1} queued`;
+      const data=await api(`/api/backfill/window?from_ms=${w.from}&to_ms=${w.to}`, {method:'POST'});
+      if(data.status === 'split_required'){
+        const mid=Number(data.split_at_ms);
+        queue.unshift({from:mid+1,to:w.to});
+        queue.unshift({from:w.from,to:mid});
+        splitCount += 1; estimatedTotal += 1;
+      } else {
+        completed += 1;
+        processedCalls += Number(data.call_rows_processed || 0);
+        activityRows += Number(data.agent_activity_rows_processed || 0);
+        if(data.availability_reliable === false) warnings += 1;
+      }
+      const donePct=Math.min(100, Math.round((completed / Math.max(estimatedTotal,1)) * 100));
+      $('backfillProgress').style.width=`${donePct}%`;
+      $('backfillStatus').textContent = state.backfillStop
+        ? 'Stopping after current window…'
+        : `Imported ${completed} of ~${estimatedTotal} windows · ${processedCalls} call rows · ${activityRows} agent activity rows${splitCount ? ` · ${splitCount} automatic splits` : ''}${warnings ? ` · ${warnings} reliability warning${warnings===1?'':'s'}` : ''}`;
+      await loadDashboard();
+    }
+    if(state.backfillStop){
+      $('backfillStatus').textContent = 'Historical import stopped after the current window.';
+    } else {
+      $('backfillProgress').style.width='100%';
+      $('backfillStatus').textContent = `Historical import complete · ${processedCalls} call rows processed · ${activityRows} agent activity rows processed${splitCount ? ` · ${splitCount} automatic splits` : ''}${warnings ? ` · ${warnings} reliability warning${warnings===1?'':'s'}` : ''}`;
+    }
+  }catch(err){ showError(err); $('backfillStatus').textContent='Historical import failed.'; }
+  finally{
+    state.backfillRunning=false; $('startBackfillBtn').disabled=false; $('cancelBackfillBtn').style.display='none'; state.backfillStop=false;
+  }
+}
+
+$('applyBtn').addEventListener('click', loadDashboard);
+$('clearBtn').addEventListener('click', () => {
+  ['fromDate','toDate','queue','agent','outcome','sms','callerQuery'].forEach(id => $(id).value='');
+  loadDashboard();
+});
+$('callerQuery').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') loadDashboard(); });
+$('refreshBtn').addEventListener('click', loadDashboard);
+$('syncBtn').addEventListener('click', async () => {
+  clearError(); $('status').textContent='Syncing Webex…';
+  try { await api('/api/sync', {method:'POST'}); await loadDashboard(); }
+  catch(err){ showError(err); $('status').textContent='Sync failed'; }
+});
+$('backfillBtn').addEventListener('click', () => $('backfillPanel').classList.toggle('show'));
+$('closeBackfillBtn').addEventListener('click', () => $('backfillPanel').classList.remove('show'));
+$('startBackfillBtn').addEventListener('click', runBackfill);
+$('cancelBackfillBtn').addEventListener('click', () => { state.backfillStop=true; $('backfillStatus').textContent='Stopping after current window…'; });
+
+document.addEventListener('DOMContentLoaded', () => {
+  enableDatePicker('fromDate');
+  enableDatePicker('toDate');
+  $('backfillEnd').value = new Date().toISOString().slice(0,10);
+  loadDashboard();
+  loadSyncStatus();
+  setInterval(() => { loadDashboard(); loadSyncStatus(); }, state.autoRefreshMs);
+});
+</script>
+</body>
+</html>

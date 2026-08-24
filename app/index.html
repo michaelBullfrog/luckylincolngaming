@@ -256,10 +256,17 @@ function enableDatePicker(id){
 function secondsLabel(v){
   const n = Number(v || 0); const m = Math.floor(n/60); const s = Math.round(n%60);
   return m ? `${m}m ${String(s).padStart(2,'0')}s` : `${s}s`;
-}
+
 function fmtTime(iso){
   if(!iso) return '—';
-  return new Intl.DateTimeFormat([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date(iso));
+  return new Intl.DateTimeFormat([], {
+    year:'numeric',
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit',
+    second:'2-digit'
+  }).format(new Date(iso));
 }
 function esc(v){ return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function outcomeLabel(v){ return ({ANSWERED:'Answered',UNSERVED_AGENTS_AVAILABLE:'Unserved — Agents Available',UNSERVED_NO_AGENTS_AVAILABLE:'Unserved — No Agents Available',UNSERVED_AVAILABILITY_UNKNOWN:'Unserved — Availability Unknown',IN_PROGRESS:'In Progress',REVIEW:'Review'})[v] || v || 'Unknown'; }

@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: lucky-lincoln-contact-center
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lucky-lincoln-contact-center-db
+          property: connectionString
+      - key: WEBEX_SEARCH_URL
+        sync: false
+      - key: WEBEX_ACCESS_TOKEN
+        sync: false
+      - key: SYNC_LOOKBACK_MINUTES
+        value: "1440"
+      - key: AUTO_SYNC_ENABLED
+        value: "true"
+      - key: AUTO_SYNC_SECONDS
+        value: "120"
+      - key: AUTO_SYNC_LOOKBACK_MINUTES
+        value: "180"
+      - key: CLERKCHAT_FALLBACK_SYNC_MINUTES
+        value: "90"
+      - key: SMS_MATCH_WINDOW_MINUTES
+        value: "60"
+      - key: SMS_RETRY_MAX_AGE_HOURS
+        value: "24"
+      - key: CLERKCHAT_WEBHOOK_TOKEN
+        sync: false
+
+databases:
+  - name: lucky-lincoln-contact-center-db
+    databaseName: lucky_lincoln
+    user: lucky_lincoln

@@ -206,9 +206,6 @@
       <div class="card green"><div class="label">Answered</div><div class="value" id="answered">—</div><div class="note">Connected to an agent</div></div>
       <div class="card red"><div class="label">Unserved</div><div class="value" id="unserved">—</div><div class="note">Did not reach an agent</div></div>
       <div class="card gold"><div class="label">Agent Available</div><div class="value" id="agentsAvailable">—</div><div class="note">Unserved while an observed agent for this queue was available</div></div>
-      <div class="card red"><div class="label">Agents On Call</div><div class="value" id="agentsOnCall">—</div><div class="note">Unserved while observed agents for this queue were busy</div></div>
-      <div class="card red"><div class="label">Idle / Code</div><div class="value" id="agentsIdleCode">—</div><div class="note">Observed queue agents were logged in but unavailable</div></div>
-      <div class="card red"><div class="label">No Agents Logged In</div><div class="value" id="noAgentsLoggedIn">—</div><div class="note">No observed queue-agent state overlapped the queue wait</div></div>
       <div class="card"><div class="label">Not Queued / IVR Exit</div><div class="value" id="notQueued">—</div><div class="note">Calls with no queue and 0s queue wait; excluded from Unserved</div></div>
       <div class="card"><div class="label">Availability Unknown</div><div class="value" id="availabilityUnknown">—</div><div class="note">Queue roster/state evidence is incomplete</div></div>
       <div class="card gold"><div class="label">Rerouted to Supervisor</div><div class="value" id="reroutedSupervisor">—</div><div class="note">Calls that reached the supervisor-reroute flow webhook</div></div>
@@ -300,9 +297,6 @@ async function loadDashboard(){
     $('answered').textContent=summary.answered;
     $('unserved').textContent=summary.unserved;
     $('agentsAvailable').textContent=summary.unserved_agents_available ?? 0;
-    $('agentsOnCall').textContent=summary.unserved_agents_on_call ?? 0;
-    $('agentsIdleCode').textContent=summary.unserved_agents_idle_code ?? 0;
-    $('noAgentsLoggedIn').textContent=summary.unserved_no_agents_logged_in ?? 0;
     $('notQueued').textContent=summary.not_queued_ivr_exit ?? 0;
     $('availabilityUnknown').textContent=summary.unserved_availability_unknown ?? 0;
     $('reroutedSupervisor').textContent=summary.rerouted_to_supervisor ?? 0;

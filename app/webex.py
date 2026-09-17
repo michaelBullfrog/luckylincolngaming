@@ -1,10 +1,21 @@
+import asyncio
 import os
+import time
 from typing import Any
 
 import httpx
 
+from .db import SessionLocal
+from .models import WebexOAuthToken
+
 SEARCH_URL = os.getenv("WEBEX_SEARCH_URL", "")
 ACCESS_TOKEN = os.getenv("WEBEX_ACCESS_TOKEN", "")
+CLIENT_ID = os.getenv("WEBEX_CLIENT_ID", "")
+CLIENT_SECRET = os.getenv("WEBEX_CLIENT_SECRET", "")
+REFRESH_TOKEN = os.getenv("WEBEX_REFRESH_TOKEN", "")
+TOKEN_URL = os.getenv("WEBEX_TOKEN_URL", "https://webexapis.com/v1/access_token")
+
+_token_lock = asyncio.Lock()
 
 TASK_DETAILS_QUERY = """
 query($from: Long!, $to: Long!, $cursor: String!) {
@@ -93,11 +104,124 @@ class WebexError(RuntimeError):
     pass
 
 
-def _headers() -> dict[str, str]:
-    if not SEARCH_URL or not ACCESS_TOKEN:
-        raise WebexError("WEBEX_SEARCH_URL and WEBEX_ACCESS_TOKEN must be configured")
+def _now_ms() -> int:
+    return int(time.time() * 1000)
+
+
+def _oauth_configured() -> bool:
+    return bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN)
+
+
+def _load_saved_token() -> WebexOAuthToken | None:
+    try:
+        with SessionLocal() as db:
+            row = db.get(WebexOAuthToken, 1)
+            if row is None:
+                return None
+            return WebexOAuthToken(
+                id=row.id,
+                access_token=row.access_token,
+                refresh_token=row.refresh_token,
+                access_token_expires_at_ms=row.access_token_expires_at_ms,
+                refresh_token_expires_at_ms=row.refresh_token_expires_at_ms,
+                updated_ms=row.updated_ms,
+            )
+    except Exception:
+        return None
+
+
+def _save_token(payload: dict[str, Any], fallback_refresh_token: str) -> None:
+    now = _now_ms()
+    expires_in = int(payload.get("expires_in") or 0)
+    refresh_expires_in = int(payload.get("refresh_token_expires_in") or 0)
+    new_refresh = payload.get("refresh_token") or fallback_refresh_token
+
+    with SessionLocal() as db:
+        row = db.get(WebexOAuthToken, 1)
+        if row is None:
+            row = WebexOAuthToken(id=1, updated_ms=now)
+            db.add(row)
+        row.access_token = payload.get("access_token")
+        row.refresh_token = new_refresh
+        row.access_token_expires_at_ms = now + expires_in * 1000 if expires_in else None
+        row.refresh_token_expires_at_ms = (
+            now + refresh_expires_in * 1000 if refresh_expires_in else None
+        )
+        row.updated_ms = now
+        db.commit()
+
+
+async def _refresh_access_token() -> str:
+    if not _oauth_configured():
+        raise WebexError(
+            "Webex access token is invalid/expired and OAuth refresh is not configured. "
+            "Set WEBEX_CLIENT_ID, WEBEX_CLIENT_SECRET, and WEBEX_REFRESH_TOKEN."
+        )
+
+    async with _token_lock:
+        saved = _load_saved_token()
+        now = _now_ms()
+        if (
+            saved
+            and saved.access_token
+            and saved.access_token_expires_at_ms
+            and saved.access_token_expires_at_ms > now + 60_000
+        ):
+            return saved.access_token
+
+        refresh_token = (saved.refresh_token if saved and saved.refresh_token else None) or REFRESH_TOKEN
+        data = {
+            "grant_type": "refresh_token",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "refresh_token": refresh_token,
+        }
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(
+                TOKEN_URL,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                data=data,
+            )
+        if response.status_code >= 400:
+            raise WebexError(
+                f"Webex OAuth refresh HTTP {response.status_code}: {response.text[:3000]}"
+            )
+        payload = response.json()
+        token = payload.get("access_token")
+        if not token:
+            raise WebexError(f"Webex OAuth refresh did not return access_token: {payload}")
+        _save_token(payload, refresh_token)
+        return token
+
+
+async def _get_access_token(*, force_refresh: bool = False) -> str:
+    saved = _load_saved_token()
+    now = _now_ms()
+    if not force_refresh and saved and saved.access_token:
+        if not saved.access_token_expires_at_ms or saved.access_token_expires_at_ms > now + 60_000:
+            return saved.access_token
+
+    if force_refresh or (_oauth_configured() and not ACCESS_TOKEN):
+        return await _refresh_access_token()
+
+    if ACCESS_TOKEN:
+        return ACCESS_TOKEN
+
+    if _oauth_configured():
+        return await _refresh_access_token()
+
+    raise WebexError(
+        "Webex authentication is not configured. Set WEBEX_ACCESS_TOKEN, or configure "
+        "WEBEX_CLIENT_ID, WEBEX_CLIENT_SECRET, and WEBEX_REFRESH_TOKEN."
+    )
+
+
+async def _headers(*, force_refresh: bool = False) -> dict[str, str]:
+    if not SEARCH_URL:
+        raise WebexError("WEBEX_SEARCH_URL must be configured")
+    token = await _get_access_token(force_refresh=force_refresh)
     return {
-        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
         "Accept-Encoding": "gzip",
     }
@@ -107,9 +231,17 @@ async def _graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=120) as client:
         response = await client.post(
             SEARCH_URL,
-            headers=_headers(),
+            headers=await _headers(),
             json={"query": query, "variables": variables},
         )
+
+        if response.status_code == 401 and _oauth_configured():
+            response = await client.post(
+                SEARCH_URL,
+                headers=await _headers(force_refresh=True),
+                json={"query": query, "variables": variables},
+            )
+
     if response.status_code >= 400:
         raise WebexError(f"Webex HTTP {response.status_code}: {response.text[:3000]}")
     payload = response.json()
@@ -161,12 +293,7 @@ async def fetch_tasks(from_ms: int, to_ms: int) -> list[dict[str, Any]]:
 
 
 async def fetch_tasks_by_ended_time(from_ms: int, to_ms: int) -> list[dict[str, Any]]:
-    """Fetch taskDetails whose endedTime falls inside the requested window.
-
-    Used only for recent/live sync so newly completed contacts are picked up based
-    on when they actually ended. Historical import keeps the original createdTime
-    comparator to preserve existing behavior.
-    """
+    """Fetch taskDetails whose endedTime falls inside the requested window."""
     tasks: list[dict[str, Any]] = []
     cursor = "NA"
     pages = 0
@@ -190,12 +317,7 @@ async def fetch_tasks_by_ended_time(from_ms: int, to_ms: int) -> list[dict[str, 
 
 
 async def fetch_agent_sessions(from_ms: int, to_ms: int) -> list[dict[str, Any]]:
-    """Fetch all outer agentSession pages for a time window.
-
-    AAR activity lists are requested at Webex's documented maximum of 100 per
-    channel. Callers can use activity_truncation_counts() to detect channels
-    whose inner activity history requires a narrower import window.
-    """
+    """Fetch all outer agentSession pages for a time window."""
     sessions: list[dict[str, Any]] = []
     cursor = "NA"
     pages = 0

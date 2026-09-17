@@ -83,3 +83,13 @@ class CallJourneyEvent(Base):
     ani: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     dnis: Mapped[str | None] = mapped_column(String(64), nullable=True)
     raw_json: Mapped[str] = mapped_column(Text)
+
+class WebexOAuthToken(Base):
+    __tablename__ = "webex_oauth_tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    access_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    access_token_expires_at_ms: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    refresh_token_expires_at_ms: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    updated_ms: Mapped[int] = mapped_column(BigInteger, default=0)
